@@ -11,15 +11,7 @@ from RessoMusic.misc import sudo
 from RessoMusic.plugins import ALL_MODULES
 from RessoMusic.utils.database import get_banned_users, get_gbanned
 from config import BANNED_USERS
-import threading
-from flask import Flask
 
-# Flask app definition
-flask_app = Flask(__name__)
-
-@flask_app.route("/")
-def home():
-    return "RessoMusic is running on Flask and Thread!"
 
 async def init():
     if (
@@ -58,7 +50,7 @@ async def init():
         pass
     await AMBOTOP.decorators()
     LOGGER("RessoMusic").info(
-        "moon music started"
+        "BsdK Resso Music Start Hoga Be Ab"
     )
     await idle()
     await app.stop()
@@ -66,13 +58,5 @@ async def init():
     LOGGER("RessoMusic").info("Stopping AMBOTOP Music Bot...")
 
 
-def run_flask():
-    flask_app.run(host="0.0.0.0", port=8000)
-
 if __name__ == "__main__":
-    # Flask server in a separate thread
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.start()
-
-    # Run the async bot
-     asyncio.get_event_loop().run_until_complete(init())
+    asyncio.get_event_loop().run_until_complete(init())
