@@ -11,7 +11,7 @@ API_ID = int(getenv("API_ID","18996880"))
 API_HASH = getenv("API_HASH","4fbf3bdd35495f210e14b54d4588688d")
 
 # Get your token from @BotFather on Telegram.
-BOT_TOKEN = getenv("BOT_TOKEN","5907277199:AAGKbtnTVZ-brT9w2ksl8B31Dzh9YRm0R4I")
+BOT_TOKEN = getenv("BOT_TOKEN","5907277199:AAHBiFZpWLpfYz1ZPeRtzOBuwrXmjHOWD5s")
 
 # Get your mongo url from cloud.mongodb.com
 MONGO_DB_URI = getenv("MONGO_DB_URI","mongodb+srv://moon:moon@moon.r2zqa.mongodb.net/?retryWrites=true&w=majority&appName=moon")
@@ -36,7 +36,7 @@ UPSTREAM_REPO = getenv(
 )
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 GIT_TOKEN = getenv(
-    "GIT_TOKEN", ""
+    "GIT_TOKEN", "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"
 )  # Fill this variable if your upstream repository is private
 
 SUPPORT_CHANNEL = getenv("SUPPORT_CHAT", "https://t.me/world_friend_chatting_zone")
