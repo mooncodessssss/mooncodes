@@ -32,7 +32,7 @@ HEROKU_API_KEY = getenv("HEROKU_API_KEY","HRKU-417b5d4b-0c2c-4442-a551-21a2faad1
 
 UPSTREAM_REPO = getenv(
     "UPSTREAM_REPO",
-    "https://github.com/vampiregirl0803/moond",
+    "https://github.com/mooncodesss/moond",
 )
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 GIT_TOKEN = getenv(
