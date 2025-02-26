@@ -8,25 +8,29 @@ import yt_dlp
 from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from youtubesearchpython.__future__ import VideosSearch
+from config import YTPROXY_URL as YTPROXY
 from RessoMusic.utils.database import is_on_off
 from RessoMusic.utils.formatters import time_to_seconds
+
+from RessoMusic import LOGGER
+
+
 import os
 import glob
 import random
 import logging
 
-import requests
-import glob
-import os
-import random
-
-
 def cookie_txt_file():
-    cookie_dir = "RessoMusic/cookies"
-    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
+    folder_path = f"{os.getcwd()}/cookies"
+    filename = f"{os.getcwd()}/cookies/logs.csv"
+    txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
+    if not txt_files:
+        raise FileNotFoundError("No .txt files found in the specified folder.")
+    cookie_txt_file = random.choice(txt_files)
+    with open(filename, 'a') as file:
+        file.write(f'Choosen File : {cookie_txt_file}\n')
+    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
-    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
-    return cookie_file
 
 
 async def check_file_size(link):
@@ -87,6 +91,39 @@ class YouTubeAPI:
         self.listbase = "https://youtube.com/playlist?list="
         self.reg = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 
+    async def _get_video_details(self, link: str, limit: int = 20) -> Union[dict, None]:
+        """Helper function to get video details with duration limit and error handling"""
+        try:
+            results = VideosSearch(link, limit=limit)
+            search_results = (await results.next()).get("result", [])
+
+            for result in search_results:
+                duration_str = result.get("duration", "0:00")
+
+                # Convert duration to seconds
+                try:
+                    parts = duration_str.split(":")
+                    duration_secs = 0
+                    if len(parts) == 3:  # HH:MM:SS
+                        duration_secs = int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+                    elif len(parts) == 2:  # MM:SS
+                        duration_secs = int(parts[0]) * 60 + int(parts[1])
+
+                    # Skip videos longer than 1 hour
+                    if duration_secs > 3600:
+                        continue
+
+                    return result
+
+                except (ValueError, IndexError):
+                    continue
+
+            return None
+
+        except Exception as e:
+            LOGGER(__name__).error(f"Error in _get_video_details: {str(e)}")
+            return None
+
     async def exists(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
@@ -124,16 +161,21 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
-        results = VideosSearch(link, limit=1)
-        for result in (await results.next())["result"]:
-            title = result["title"]
-            duration_min = result["duration"]
-            thumbnail = result["thumbnails"][0]["url"].split("?")[0]
-            vidid = result["id"]
-            if str(duration_min) == "None":
-                duration_sec = 0
-            else:
-                duration_sec = int(time_to_seconds(duration_min))
+
+        result = await self._get_video_details(link)
+        if not result:
+            raise ValueError("No suitable video found (duration > 1 hour or video unavailable)")
+
+        title = result["title"]
+        duration_min = result["duration"]
+        thumbnail = result["thumbnails"][0]["url"].split("?")[0]
+        vidid = result["id"]
+
+        if str(duration_min) == "None":
+            duration_sec = 0
+        else:
+            duration_sec = int(time_to_seconds(duration_min))
+
         return title, duration_min, duration_sec, thumbnail, vidid
 
     async def title(self, link: str, videoid: Union[bool, str] = None):
@@ -141,30 +183,33 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
-        results = VideosSearch(link, limit=1)
-        for result in (await results.next())["result"]:
-            title = result["title"]
-        return title
+            
+        result = await self._get_video_details(link)
+        if not result:
+            raise ValueError("No suitable video found (duration > 1 hour or video unavailable)")
+        return result["title"]
 
     async def duration(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
-        results = VideosSearch(link, limit=1)
-        for result in (await results.next())["result"]:
-            duration = result["duration"]
-        return duration
+
+        result = await self._get_video_details(link)
+        if not result:
+            raise ValueError("No suitable video found (duration > 1 hour or video unavailable)")
+        return result["duration"]
 
     async def thumbnail(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
-        results = VideosSearch(link, limit=1)
-        for result in (await results.next())["result"]:
-            thumbnail = result["thumbnails"][0]["url"].split("?")[0]
-        return thumbnail
+
+        result = await self._get_video_details(link)
+        if not result:
+            raise ValueError("No suitable video found (duration > 1 hour or video unavailable)")
+        return result["thumbnails"][0]["url"].split("?")[0]
 
     async def video(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
@@ -209,21 +254,19 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
-        results = VideosSearch(link, limit=1)
-        for result in (await results.next())["result"]:
-            title = result["title"]
-            duration_min = result["duration"]
-            vidid = result["id"]
-            yturl = result["link"]
-            thumbnail = result["thumbnails"][0]["url"].split("?")[0]
+
+        result = await self._get_video_details(link)
+        if not result:
+            raise ValueError("No suitable video found (duration > 1 hour or video unavailable)")
+
         track_details = {
-            "title": title,
-            "link": yturl,
-            "vidid": vidid,
-            "duration_min": duration_min,
-            "thumb": thumbnail,
+            "title": result["title"],
+            "link": result["link"],
+            "vidid": result["id"],
+            "duration_min": result["duration"],
+            "thumb": result["thumbnails"][0]["url"].split("?")[0],
         }
-        return track_details, vidid
+        return track_details, result["id"]
 
     async def formats(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
@@ -261,23 +304,47 @@ class YouTubeAPI:
                     )
         return formats_available, link
 
-    async def slider(
-        self,
-        link: str,
-        query_type: int,
-        videoid: Union[bool, str] = None,
-    ):
+    async def slider(self, link: str, query_type: int, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
-        a = VideosSearch(link, limit=10)
-        result = (await a.next()).get("result")
-        title = result[query_type]["title"]
-        duration_min = result[query_type]["duration"]
-        vidid = result[query_type]["id"]
-        thumbnail = result[query_type]["thumbnails"][0]["url"].split("?")[0]
-        return title, duration_min, thumbnail, vidid
+
+        try:
+            results = []
+            search = VideosSearch(link, limit=10)
+            search_results = (await search.next()).get("result", [])
+
+            # Filter videos longer than 1 hour
+            for result in search_results:
+                duration_str = result.get("duration", "0:00")
+                try:
+                    parts = duration_str.split(":")
+                    duration_secs = 0
+                    if len(parts) == 3:
+                        duration_secs = int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+                    elif len(parts) == 2:
+                        duration_secs = int(parts[0]) * 60 + int(parts[1])
+
+                    if duration_secs <= 3600:
+                        results.append(result)
+                except (ValueError, IndexError):
+                    continue
+
+            if not results or query_type >= len(results):
+                raise ValueError("No suitable videos found within duration limit")
+
+            selected = results[query_type]
+            return (
+                selected["title"],
+                selected["duration"],
+                selected["thumbnails"][0]["url"].split("?")[0],
+                selected["id"]
+            )
+
+        except Exception as e:
+            LOGGER(__name__).error(f"Error in slider: {str(e)}")
+            raise ValueError("Failed to fetch video details")
 
     async def download(
         self,
@@ -291,25 +358,29 @@ class YouTubeAPI:
         title: Union[bool, str] = None,
     ) -> str:
         if videoid:
+            vid_id = link
             link = self.base + link
         loop = asyncio.get_running_loop()
+
         def audio_dl():
-            ydl_optssx = {
-                "format": "bestaudio/best",
-                "outtmpl": "downloads/%(id)s.%(ext)s",
-                "geo_bypass": True,
-                "nocheckcertificate": True,
-                "quiet": True,
-                "cookiefile" : cookie_txt_file(),
-                "no_warnings": True,
-            }
-            x = yt_dlp.YoutubeDL(ydl_optssx)
-            info = x.extract_info(link, False)
-            xyz = os.path.join("downloads", f"{info['id']}.{info['ext']}")
-            if os.path.exists(xyz):
-                return xyz
-            x.download([link])
-            return xyz
+            try:
+                res = requests.get(f"{YTPROXY}/{vid_id}")
+                response = res.json()
+                if response['status'] == 'success':
+                    fpath = f"downloads/{vid_id}.{response['ext']}"
+                    if os.path.exists(fpath):
+                        return fpath
+                    download_link = response['download_link']
+                    with requests.get(download_link, stream=True) as data:
+                        data.raise_for_status() 
+                        with open(fpath, "wb") as f:
+                            for chunk in data.iter_content(chunk_size=8192):
+                                if chunk:
+                                    f.write(chunk)
+                        return fpath
+            except Exception as e:
+                LOGGER(__name__).error(f"Error in downloading song :{e}")
+                return None
 
         def video_dl():
             ydl_optssx = {
