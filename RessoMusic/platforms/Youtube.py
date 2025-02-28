@@ -9,10 +9,10 @@ from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from youtubesearchpython.__future__ import VideosSearch
 from config import YTPROXY_URL as YTPROXY
-from AnonXMusic.utils.database import is_on_off
-from AnonXMusic.utils.formatters import time_to_seconds
+from RessoMusic.utils.database import is_on_off
+from RessoMusic.utils.formatters import time_to_seconds
 
-from AnonXMusic import LOGGER
+from RessoMusic import LOGGER
 
 
 import os
