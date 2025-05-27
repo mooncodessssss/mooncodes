@@ -121,7 +121,7 @@ async def gen_thumb(videoid: str):
         draw = ImageDraw.Draw(blurred_thumbnail)
         title_words = title.split()[:6] 
         truncated_title = ' '.join(title_words)
-        draw.text((600, 190), f"font=font, fill=predefined_color())
+        draw.text((600, 190), f"Uɴᴛᴏʟᴅ", font=font, fill=predefined_color())
         draw.text((600, 220), f"{truncated_title}", font=font, fill=(255, 255,255))
         draw.text((600, 260), f"{channel}", font=font, fill=(255, 255,255))
         try:
