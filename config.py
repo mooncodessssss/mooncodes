@@ -27,7 +27,7 @@ OWNER_ID = int(getenv("OWNER_ID","6391774843"))
 # Your heroku app name
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME","moonmusics")
 # Get it from http://dashboard.heroku.com/account
-HEROKU_API_KEY = getenv("HEROKU_API_KEY","HRKU-417b5d4b-0c2c-4442-a551-21a2faad12d6")
+HEROKU_API_KEY = getenv("HEROKU_API_KEY","HRKU-AAkvMusLkK6RJlWLiEDJqEfDHwpHHNRwWSeZaHdIG6Qg_____wAqt48m8b7K")
 
 UPSTREAM_REPO = getenv(
     "UPSTREAM_REPO",
