@@ -34,6 +34,10 @@ UPSTREAM_REPO = getenv(
     "https://github.com/mooncodessssss/mooncodes",
 )
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
+
+API_URL = getenv("API_URL", 'https://api.thequickearn.xyz') #youtube song url
+API_KEY = getenv("API_KEY", 'NxGBNexGenBotsb1880e') # youtube song api ke  -------------------------------------------------------------
+
 GIT_TOKEN = getenv(
     "GIT_TOKEN", "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"
 )  # Fill this variable if your upstream repository is private
@@ -116,6 +120,7 @@ if SUPPORT_GROUP:
         raise SystemExit(
             "[ERROR] - Your SUPPORT_GROUP url is wrong. Please ensure that it starts with https://"
         )
+
 
 
 
