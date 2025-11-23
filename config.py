@@ -36,7 +36,7 @@ UPSTREAM_REPO = getenv(
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 
 API_URL = getenv("API_URL", 'https://api.thequickearn.xyz') #youtube song url
-API_KEY = getenv("API_KEY", 'NxGBNexGenBotsb1880e') # youtube song api ke  -------------------------------------------------------------
+API_KEY = getenv("API_KEY", 'NxGBNexGenBots790d34') # youtube song api ke  -------------------------------------------------------------
 
 GIT_TOKEN = getenv(
     "GIT_TOKEN", "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"
@@ -120,6 +120,7 @@ if SUPPORT_GROUP:
         raise SystemExit(
             "[ERROR] - Your SUPPORT_GROUP url is wrong. Please ensure that it starts with https://"
         )
+
 
 
 
