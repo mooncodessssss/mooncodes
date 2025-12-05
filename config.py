@@ -41,7 +41,7 @@ API_KEY = getenv("API_KEY", 'NxGBNexGenBots4556e3') # youtube song api ke # ----
 #---------------------------------------------------------------
 
 GIT_TOKEN = getenv(
-    "GIT_TOKEN", "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"
+    "GIT_TOKEN", "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"
 )  # Fill this variable if your upstream repository is private
 
 SUPPORT_CHANNEL = getenv("SUPPORT_CHAT", "https://t.me/world_friend_chatting_zone")
@@ -122,6 +122,7 @@ if SUPPORT_GROUP:
         raise SystemExit(
             "[ERROR] - Your SUPPORT_GROUP url is wrong. Please ensure that it starts with https://"
         )
+
 
 
 
